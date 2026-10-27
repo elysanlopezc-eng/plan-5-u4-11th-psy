@@ -1,0 +1,774 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Colegio Montano - Interactive Digital Whiteboard</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        // Custom Tailwind theme with Colegio Montano Brand Colors
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        montano: {
+                            blue: '#1269A8',
+                            yellow: '#F7D615',
+                            greenish: '#54887D',
+                            lightblue: '#88B5C7',
+                            olive: '#A6B046',
+                            bg: '#F2F5E9'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Segoe UI', 'Tahoma', 'Verdana', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #F2F5E9;
+            font-family: 'Segoe UI', 'Tahoma', 'Verdana', sans-serif;
+        }
+        /* Custom scrollbar for interactive cards */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #e2e8f0;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #54887D;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #1269A8;
+        }
+        .tab-btn.active {
+            background-color: #1269A8;
+            color: #ffffff;
+            border-bottom: 4px solid #F7D615;
+            font-weight: bold;
+        }
+        .tab-btn {
+            background-color: #ffffff;
+            color: #1269A8;
+            transition: all 0.3s ease;
+        }
+        .tab-btn:hover:not(.active) {
+            background-color: #88B5C7;
+            color: #ffffff;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-gray-800">
+
+    <!-- HEADER / NAVIGATION BAR -->
+    <header class="bg-montano-blue text-white shadow-md border-b-4 border-montano-yellow sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-4">
+            <!-- Brand Logo & Header Info -->
+            <div class="flex items-center space-x-4">
+                <div class="bg-white p-1.5 rounded-lg shadow">
+                    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQyEop0yf6lZ7Jk9MILZxF1rBj4Oqs5esyhIQ&s" 
+                         alt="Colegio Montano Logo" 
+                         class="h-12 w-auto object-contain"
+                         onerror="this.onerror=null; this.src='https://placehold.co/120x50/1269A8/ffffff?text=Montano';">
+                </div>
+                <div>
+                    <h1 class="text-xl md:text-2xl font-bold tracking-wide flex items-center gap-2">
+                        <span>COLEGIO MONTANO</span>
+                        <span class="text-xs bg-montano-yellow text-gray-900 px-2 py-0.5 rounded-full font-semibold uppercase tracking-wider">Digital Board</span>
+                    </h1>
+                    <p class="text-xs text-montano-lightblue font-medium">Interactive Pedagogical Lesson Plan</p>
+                </div>
+            </div>
+
+            <!-- Header Quick Info & Fullscreen Toggle -->
+            <div class="flex items-center gap-3 ml-auto">
+                <div class="hidden lg:flex flex-col text-right text-xs bg-white/10 px-3 py-1.5 rounded-lg border border-white/20">
+                    <span class="font-semibold text-montano-yellow"><i class="fa-solid fa-graduation-cap mr-1"></i>4th High School</span>
+                    <span>Psychology | Plan #5</span>
+                </div>
+                
+                <button onclick="toggleFullScreen()" id="fullscreen-btn" 
+                        class="bg-montano-yellow hover:bg-yellow-400 text-gray-900 font-bold px-4 py-2 rounded-lg shadow transition flex items-center gap-2 text-sm">
+                    <i class="fa-solid fa-expand" id="fullscreen-icon"></i>
+                    <span id="fullscreen-text" class="hidden sm:inline">Fullscreen</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- LESSON METADATA & INSTITUTIONAL ALIGNMENT BAR -->
+    <section class="bg-white border-b border-gray-200 shadow-sm py-3 px-4">
+        <div class="max-w-7xl mx-auto grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 text-xs">
+            <div class="bg-montano-bg p-2 rounded-md border border-gray-200">
+                <span class="block text-gray-500 font-semibold uppercase text-[10px]">Course</span>
+                <span class="font-bold text-montano-blue truncate block">Psychology</span>
+            </div>
+            <div class="bg-montano-bg p-2 rounded-md border border-gray-200">
+                <span class="block text-gray-500 font-semibold uppercase text-[10px]">Topic</span>
+                <span class="font-bold text-gray-800 truncate block">Class 5: Key Perspectives I</span>
+            </div>
+            <div class="bg-montano-bg p-2 rounded-md border border-gray-200">
+                <span class="block text-gray-500 font-semibold uppercase text-[10px]">Grade & Unit</span>
+                <span class="font-bold text-gray-800 truncate block">4th HS | Unit 1</span>
+            </div>
+            <div class="bg-montano-bg p-2 rounded-md border border-gray-200">
+                <span class="block text-gray-500 font-semibold uppercase text-[10px]">Plan & Date</span>
+                <span class="font-bold text-gray-800 truncate block">Plan #5 | Feb 8th - 12th</span>
+            </div>
+            <div class="bg-montano-bg p-2 rounded-md border border-gray-200">
+                <span class="block text-gray-500 font-semibold uppercase text-[10px]">Teacher</span>
+                <span class="font-bold text-gray-800 truncate block">Elysa López</span>
+            </div>
+            <div class="bg-montano-yellow/20 p-2 rounded-md border border-montano-yellow/50 col-span-2 sm:col-span-1">
+                <span class="block text-montano-blue font-bold uppercase text-[10px]"><i class="fa-solid fa-star mr-1"></i>Montano Habit</span>
+                <span class="font-semibold text-gray-800 truncate block">Seek First to Understand...</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- MAIN CONTENT CONTAINER WITH TABS -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 flex flex-col gap-6">
+
+        <!-- INSTITUTIONAL PEDAGOGICAL FRAMEWORK OVERVIEW (COLLAPSIBLE) -->
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <button onclick="toggleFramework()" class="w-full bg-montano-greenish text-white px-5 py-3 flex justify-between items-center font-bold text-sm hover:bg-opacity-90 transition">
+                <span class="flex items-center gap-2"><i class="fa-solid fa-compass"></i> CURRICULAR ALIGNMENT & INSTITUTIONAL FRAMEWORK (Guatemala CNB & Montano Model)</span>
+                <i id="framework-chevron" class="fa-solid fa-chevron-down transition-transform"></i>
+            </button>
+            <div id="framework-content" class="hidden p-5 bg-gray-50 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                <!-- CNB & Competence -->
+                <div class="bg-white p-3.5 rounded-lg border border-gray-200 shadow-xs">
+                    <h4 class="font-bold text-montano-blue text-sm mb-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-book"></i> CNB Competence & Learning Goal
+                    </h4>
+                    <p class="text-gray-600 mb-2"><strong>Competence:</strong> Differentiates the foundational psychological perspectives, analyzing their principles to explain human behavior and mental processes in real-world contexts.</p>
+                    <p class="text-gray-600"><strong>Learning Goal:</strong> Students will successfully categorize and compare 4 key psychological perspectives (Biological, Behavioral, Cognitive, Psychodynamic) through a test anxiety case analysis.</p>
+                </div>
+                <!-- Montano Habits & Key Skills -->
+                <div class="bg-white p-3.5 rounded-lg border border-gray-200 shadow-xs">
+                    <h4 class="font-bold text-montano-olive text-sm mb-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-lightbulb"></i> Montano Habits & Core Skills
+                    </h4>
+                    <p class="text-gray-600 mb-1"><strong>Habit 5:</strong> <em>"Seek First to Understand, Then to Be Understood"</em> (Viewing behavior through multiple lenses before judging).</p>
+                    <p class="text-gray-600"><strong>Key Skills:</strong> Critical Thinking, Analytical Reasoning, Communication, Emotional Intelligence, and Collaborative Problem-Solving.</p>
+                </div>
+                <!-- Assessment & Resources -->
+                <div class="bg-white p-3.5 rounded-lg border border-gray-200 shadow-xs">
+                    <h4 class="font-bold text-montano-blue text-sm mb-1 flex items-center gap-1.5">
+                        <i class="fa-solid fa-list-check"></i> Assessment & Resources
+                    </h4>
+                    <p class="text-gray-600 mb-1"><strong>Evaluation:</strong> Diagnostic (Intro warm-up), Formative (Group matrix application), Summative (Plenary Rubric).</p>
+                    <p class="text-gray-600"><strong>Resources:</strong> Whiteboard, Case Study Cards, Perspective Handouts, Interactive Quiz, Rubric.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- MAIN INTERACTIVE BOARD NAVIGATION TABS -->
+        <div class="flex flex-wrap gap-2 border-b-2 border-montano-blue pb-1">
+            <button onclick="switchTab(1)" id="tab-btn-1" class="tab-btn active px-4 py-2.5 rounded-t-lg font-semibold text-xs md:text-sm flex items-center gap-2 shadow-xs">
+                <span class="w-6 h-6 rounded-full bg-montano-yellow text-gray-900 flex items-center justify-center font-bold text-xs">I</span>
+                <span>Warm-Up & Case (10m)</span>
+            </button>
+            <button onclick="switchTab(2)" id="tab-btn-2" class="tab-btn px-4 py-2.5 rounded-t-lg font-semibold text-xs md:text-sm flex items-center gap-2 shadow-xs">
+                <span class="w-6 h-6 rounded-full bg-montano-lightblue text-white flex items-center justify-center font-bold text-xs">II</span>
+                <span>Direct Instruction (20m)</span>
+            </button>
+            <button onclick="switchTab(3)" id="tab-btn-3" class="tab-btn px-4 py-2.5 rounded-t-lg font-semibold text-xs md:text-sm flex items-center gap-2 shadow-xs">
+                <span class="w-6 h-6 rounded-full bg-montano-olive text-white flex items-center justify-center font-bold text-xs">III</span>
+                <span>Cooperative Work (20m)</span>
+            </button>
+            <button onclick="switchTab(4)" id="tab-btn-4" class="tab-btn px-4 py-2.5 rounded-t-lg font-semibold text-xs md:text-sm flex items-center gap-2 shadow-xs">
+                <span class="w-6 h-6 rounded-full bg-montano-greenish text-white flex items-center justify-center font-bold text-xs">IV</span>
+                <span>Plenary & Check (10m)</span>
+            </button>
+            <button onclick="switchTab(5)" id="tab-btn-5" class="tab-btn px-4 py-2.5 rounded-t-lg font-semibold text-xs md:text-sm flex items-center gap-2 shadow-xs ml-auto bg-gray-100 border border-gray-300">
+                <i class="fa-solid fa-clipboard-check text-montano-blue"></i>
+                <span>Plenary Assessment Rubric</span>
+            </button>
+        </div>
+
+        <!-- TAB 1: INTRO / WARM-UP & CASE PRESENTATION -->
+        <section id="tab-content-1" class="tab-content space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-montano-blue">
+                <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+                    <h2 class="text-xl font-bold text-montano-blue flex items-center gap-2">
+                        <i class="fa-solid fa-brain text-montano-yellow"></i> Moment I: Introduction & Case Presentation
+                    </h2>
+                    <span class="bg-blue-100 text-montano-blue px-3 py-1 rounded-full text-xs font-bold"><i class="fa-regular fa-clock mr-1"></i>10 Minutes</span>
+                </div>
+                <p class="text-gray-700 mb-4 text-sm">
+                    <strong>Objective:</strong> Hook student interest, activate prior knowledge, and introduce the central real-world scenario of <em>Test Anxiety</em>.
+                </p>
+
+                <!-- Case Study Box -->
+                <div class="bg-montano-bg p-5 rounded-lg border border-montano-lightblue/40 mb-6">
+                    <div class="flex items-center gap-2 text-montano-blue font-bold text-base mb-2">
+                        <i class="fa-solid fa-user-graduate"></i> Case Study: "Alex's Exam Panic"
+                    </div>
+                    <p class="text-gray-700 italic text-sm leading-relaxed mb-3">
+                        "Alex is a high school student who studies thoroughly for every psychology exam. However, as soon as the test papers are handed out, Alex's heart begins to race violently, hands start sweating, and their mind goes completely blank. Alex begins thinking: <em>'I’m going to fail, I always ruin everything.'</em> Alex remembers being harshly criticized by a parent in 3rd grade after failing a math quiz and now feels an overwhelming urge to flee the room whenever an exam starts."
+                    </p>
+                    <div class="bg-white p-3 rounded border border-gray-200 text-xs text-gray-600">
+                        <strong>Brainstorm Prompt for Students:</strong> Why is Alex experiencing this? Is it a physical reaction? A learned habit? Negative self-talk? Or deeper unconscious fears?
+                    </div>
+                </div>
+
+                <!-- Interactive Diagnostic Brainstorm Poll -->
+                <div class="bg-white p-4 rounded-lg border border-gray-200 shadow-xs">
+                    <h3 class="font-bold text-sm text-gray-800 mb-3 flex items-center gap-2">
+                        <i class="fa-solid fa-poll text-montano-greenish"></i> Quick Class Poll: What is the PRIMARY cause of Alex's anxiety?
+                    </h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <button onclick="votePoll('bio')" class="p-3 text-left border rounded-lg hover:border-montano-blue hover:bg-blue-50 transition flex flex-col justify-between">
+                            <span class="font-semibold text-xs text-montano-blue">A) Brain chemistry & heart rate</span>
+                            <span id="poll-bio-count" class="text-xs text-gray-500 mt-2 font-bold">0 votes</span>
+                        </button>
+                        <button onclick="votePoll('beh')" class="p-3 text-left border rounded-lg hover:border-montano-blue hover:bg-blue-50 transition flex flex-col justify-between">
+                            <span class="font-semibold text-xs text-montano-blue">B) Past experience & learned trigger</span>
+                            <span id="poll-beh-count" class="text-xs text-gray-500 mt-2 font-bold">0 votes</span>
+                        </button>
+                        <button onclick="votePoll('cog')" class="p-3 text-left border rounded-lg hover:border-montano-blue hover:bg-blue-50 transition flex flex-col justify-between">
+                            <span class="font-semibold text-xs text-montano-blue">C) Negative thoughts & self-talk</span>
+                            <span id="poll-cog-count" class="text-xs text-gray-500 mt-2 font-bold">0 votes</span>
+                        </button>
+                        <button onclick="votePoll('psy')" class="p-3 text-left border rounded-lg hover:border-montano-blue hover:bg-blue-50 transition flex flex-col justify-between">
+                            <span class="font-semibold text-xs text-montano-blue">D) Hidden childhood fear & pressure</span>
+                            <span id="poll-psy-count" class="text-xs text-gray-500 mt-2 font-bold">0 votes</span>
+                        </button>
+                    </div>
+                    <p class="text-[11px] text-gray-500 mt-2 italic">*Teacher Note: Click options as students raise hands to record votes live on the board!*</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: DIRECT INSTRUCTION (20 MINS) -->
+        <section id="tab-content-2" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-montano-lightblue">
+                <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+                    <h2 class="text-xl font-bold text-montano-blue flex items-center gap-2">
+                        <i class="fa-solid fa-chalkboard-user text-montano-lightblue"></i> Moment II: The 4 Key Psychological Perspectives
+                    </h2>
+                    <span class="bg-blue-100 text-montano-blue px-3 py-1 rounded-full text-xs font-bold"><i class="fa-regular fa-clock mr-1"></i>20 Minutes</span>
+                </div>
+                <p class="text-gray-700 mb-6 text-sm">
+                    Explore the fundamental concepts, key focus areas, and prominent theorists of each psychological perspective.
+                </p>
+
+                <!-- 4 Perspectives Cards Grid -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Biological -->
+                    <div class="bg-white border-2 border-red-200 hover:border-red-400 rounded-xl p-4 shadow-sm transition">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-10 h-10 rounded-full bg-red-100 text-red-600 flex items-center justify-center font-bold text-lg">
+                                <i class="fa-solid fa-dna"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-red-700 text-base">1. Biological Perspective</h3>
+                                <p class="text-xs text-gray-500">Brain, Genetics, & Physiological Systems</p>
+                            </div>
+                        </div>
+                        <ul class="text-xs space-y-1.5 text-gray-700 mb-3">
+                            <li>• <strong>Core Focus:</strong> How brain anatomy, neurotransmitters, hormones, and genes drive behavior.</li>
+                            <li>• <strong>Key Keywords:</strong> Nervous system, fight-or-flight, cortisol, adrenaline, genetics.</li>
+                            <li>• <strong>Key Theorists:</strong> Roger Sperry, Paul Broca.</li>
+                        </ul>
+                        <!-- Hidden Orientation Accordion -->
+                        <button onclick="toggleAccordion('acc-bio')" class="w-full text-left bg-red-50 hover:bg-red-100 text-red-800 text-xs font-bold px-3 py-2 rounded flex justify-between items-center transition">
+                            <span><i class="fa-solid fa-eye mr-1"></i> Perspective Lens Summary</span>
+                            <i id="acc-bio-icon" class="fa-solid fa-plus"></i>
+                        </button>
+                        <div id="acc-bio" class="hidden mt-2 p-3 bg-red-50/50 rounded text-xs text-gray-700 border border-red-100">
+                            "Behavior is a physical product of biological processes. To change feelings or behavior, we must examine physiological reactions and brain chemistry."
+                        </div>
+                    </div>
+
+                    <!-- Behavioral -->
+                    <div class="bg-white border-2 border-blue-200 hover:border-blue-400 rounded-xl p-4 shadow-sm transition">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center font-bold text-lg">
+                                <i class="fa-solid fa-dog"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-blue-700 text-base">2. Behavioral Perspective</h3>
+                                <p class="text-xs text-gray-500">Observable Actions & Learned Responses</p>
+                            </div>
+                        </div>
+                        <ul class="text-xs space-y-1.5 text-gray-700 mb-3">
+                            <li>• <strong>Core Focus:</strong> How environmental stimuli, conditioning, rewards, and punishments shape actions.</li>
+                            <li>• <strong>Key Keywords:</strong> Conditioning, reinforcement, stimulus, response, habits.</li>
+                            <li>• <strong>Key Theorists:</strong> B.F. Skinner, John B. Watson, Ivan Pavlov.</li>
+                        </ul>
+                        <button onclick="toggleAccordion('acc-beh')" class="w-full text-left bg-blue-50 hover:bg-blue-100 text-blue-800 text-xs font-bold px-3 py-2 rounded flex justify-between items-center transition">
+                            <span><i class="fa-solid fa-eye mr-1"></i> Perspective Lens Summary</span>
+                            <i id="acc-beh-icon" class="fa-solid fa-plus"></i>
+                        </button>
+                        <div id="acc-beh" class="hidden mt-2 p-3 bg-blue-50/50 rounded text-xs text-gray-700 border border-blue-100">
+                            "Psychology should focus only on observable behavior. Behaviors are learned through conditioning and association with environmental consequences."
+                        </div>
+                    </div>
+
+                    <!-- Cognitive -->
+                    <div class="bg-white border-2 border-green-200 hover:border-green-400 rounded-xl p-4 shadow-sm transition">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center font-bold text-lg">
+                                <i class="fa-solid fa-gears"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-green-700 text-base">3. Cognitive Perspective</h3>
+                                <p class="text-xs text-gray-500">Mental Processes, Memory, & Thinking</p>
+                            </div>
+                        </div>
+                        <ul class="text-xs space-y-1.5 text-gray-700 mb-3">
+                            <li>• <strong>Core Focus:</strong> How people process, store, retrieve, and interpret information.</li>
+                            <li>• <strong>Key Keywords:</strong> Perception, memory, beliefs, problem-solving, cognitive distortions.</li>
+                            <li>• <strong>Key Theorists:</strong> Jean Piaget, Aaron Beck, Albert Ellis.</li>
+                        </ul>
+                        <button onclick="toggleAccordion('acc-cog')" class="w-full text-left bg-green-50 hover:bg-green-100 text-green-800 text-xs font-bold px-3 py-2 rounded flex justify-between items-center transition">
+                            <span><i class="fa-solid fa-eye mr-1"></i> Perspective Lens Summary</span>
+                            <i id="acc-cog-icon" class="fa-solid fa-plus"></i>
+                        </button>
+                        <div id="acc-cog" class="hidden mt-2 p-3 bg-green-50/50 rounded text-xs text-gray-700 border border-green-100">
+                            "It is not events themselves that upset us, but the way we interpret and think about those events in our minds."
+                        </div>
+                    </div>
+
+                    <!-- Psychodynamic -->
+                    <div class="bg-white border-2 border-purple-200 hover:border-purple-400 rounded-xl p-4 shadow-sm transition">
+                        <div class="flex items-center gap-3 mb-2">
+                            <div class="w-10 h-10 rounded-full bg-purple-100 text-purple-600 flex items-center justify-center font-bold text-lg">
+                                <i class="fa-solid fa-water"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-bold text-purple-700 text-base">4. Psychodynamic Perspective</h3>
+                                <p class="text-xs text-gray-500">Unconscious Drives & Early Childhood Traumas</p>
+                            </div>
+                        </div>
+                        <ul class="text-xs space-y-1.5 text-gray-700 mb-3">
+                            <li>• <strong>Core Focus:</strong> How unconscious conflicts, early childhood experiences, and hidden urges guide behavior.</li>
+                            <li>• <strong>Key Keywords:</strong> Unconscious mind, defense mechanisms, repressed memories, inner conflict.</li>
+                            <li>• <strong>Key Theorists:</strong> Sigmund Freud, Carl Jung, Alfred Adler.</li>
+                        </ul>
+                        <button onclick="toggleAccordion('acc-psy')" class="w-full text-left bg-purple-50 hover:bg-purple-100 text-purple-800 text-xs font-bold px-3 py-2 rounded flex justify-between items-center transition">
+                            <span><i class="fa-solid fa-eye mr-1"></i> Perspective Lens Summary</span>
+                            <i id="acc-psy-icon" class="fa-solid fa-plus"></i>
+                        </button>
+                        <div id="acc-psy" class="hidden mt-2 p-3 bg-purple-50/50 rounded text-xs text-gray-700 border border-purple-100">
+                            "Behavior is driven by powerful inner forces and unresolved past memories operating deep below conscious awareness."
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 3: COOPERATIVE WORK / APPLICATION MATRIX (20 MINS) -->
+        <section id="tab-content-3" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-montano-olive">
+                <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+                    <h2 class="text-xl font-bold text-montano-blue flex items-center gap-2">
+                        <i class="fa-solid fa-users text-montano-olive"></i> Moment III: Cooperative Application — "Analyzing Alex's Case"
+                    </h2>
+                    <span class="bg-blue-100 text-montano-blue px-3 py-1 rounded-full text-xs font-bold"><i class="fa-regular fa-clock mr-1"></i>20 Minutes</span>
+                </div>
+                <p class="text-gray-700 mb-4 text-sm">
+                    <strong>Instructions for Teams:</strong> Form groups of 4. Assign roles: <em>1) Leader/Facilitator</em>, <em>2) Spokesperson</em>, <em>3) Scribe/Secretary</em>, <em>4) Timekeeper</em>. Complete the matrix by applying each perspective to Alex's test anxiety.
+                </p>
+
+                <!-- Interactive Analysis Matrix with Hidden Solution Buttons -->
+                <div class="overflow-x-auto mb-6">
+                    <table class="w-full text-xs text-left border-collapse border border-gray-200">
+                        <thead>
+                            <tr class="bg-montano-blue text-white">
+                                <th class="p-3 border border-gray-300">Perspective</th>
+                                <th class="p-3 border border-gray-300">Explanation of Alex's Test Anxiety</th>
+                                <th class="p-3 border border-gray-300">Proposed Intervention / Solution</th>
+                                <th class="p-3 border border-gray-300 text-center">Teacher Guidance / Reveal</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 bg-white">
+                            <tr>
+                                <td class="p-3 font-bold text-red-600 bg-red-50/30">Biological</td>
+                                <td class="p-3">Overactivation of sympathetic nervous system, excess adrenaline release, genetic predisposition to high stress.</td>
+                                <td class="p-3">Deep breathing exercises, beta-blockers, heart-rate regulation techniques.</td>
+                                <td class="p-3 text-center">
+                                    <button onclick="toggleTableSolution('sol-bio')" class="bg-red-600 hover:bg-red-700 text-white px-2.5 py-1 rounded text-[11px] font-bold">
+                                        <i class="fa-solid fa-key mr-1"></i> Reveal Model Answer
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr id="sol-bio" class="hidden bg-red-50 text-red-900 border-t border-red-200">
+                                <td colspan="4" class="p-3">
+                                    <strong>Model Solution (Biological):</strong> Alex experiences an overactive autonomic fight-or-flight response. The brain perceives the exam as a physical threat, flooding the bloodstream with cortisol and adrenaline, causing racing heart and sweating.
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="p-3 font-bold text-blue-600 bg-blue-50/30">Behavioral</td>
+                                <td class="p-3">Conditioned fear response triggered by exam setting due to past negative reinforcement/punishment.</td>
+                                <td class="p-3">Systematic desensitization, mock exams, positive reinforcement for remaining calm.</td>
+                                <td class="p-3 text-center">
+                                    <button onclick="toggleTableSolution('sol-beh')" class="bg-blue-600 hover:bg-blue-700 text-white px-2.5 py-1 rounded text-[11px] font-bold">
+                                        <i class="fa-solid fa-key mr-1"></i> Reveal Model Answer
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr id="sol-beh" class="hidden bg-blue-50 text-blue-900 border-t border-blue-200">
+                                <td colspan="4" class="p-3">
+                                    <strong>Model Solution (Behavioral):</strong> Alex learned to pair tests (conditioned stimulus) with anxiety/fear (conditioned response) due to past punishment after failing a quiz. The desire to flee is an avoidance behavior reinforced by temporary relief.
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="p-3 font-bold text-green-600 bg-green-50/30">Cognitive</td>
+                                <td class="p-3">Irrational belief systems, catastrophizing thoughts ("I will fail, I ruin everything"), memory overload.</td>
+                                <td class="p-3">Cognitive reframing, replacing negative self-talk with realistic affirmations.</td>
+                                <td class="p-3 text-center">
+                                    <button onclick="toggleTableSolution('sol-cog')" class="bg-green-600 hover:bg-green-700 text-white px-2.5 py-1 rounded text-[11px] font-bold">
+                                        <i class="fa-solid fa-key mr-1"></i> Reveal Model Answer
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr id="sol-cog" class="hidden bg-green-50 text-green-900 border-t border-green-200">
+                                <td colspan="4" class="p-3">
+                                    <strong>Model Solution (Cognitive):</strong> Alex engages in cognitive distortions (catastrophizing and overgeneralization). Negative automatic thoughts consume working memory capacity, causing Alex's mind to "go blank."
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="p-3 font-bold text-purple-600 bg-purple-50/30">Psychodynamic</td>
+                                <td class="p-3">Unconscious fear of disappointing parents stemming from repressed 3rd-grade childhood trauma.</td>
+                                <td class="p-3">Psychoanalysis, uncovering hidden conflicts, building awareness of unconscious pressures.</td>
+                                <td class="p-3 text-center">
+                                    <button onclick="toggleTableSolution('sol-psy')" class="bg-purple-600 hover:bg-purple-700 text-white px-2.5 py-1 rounded text-[11px] font-bold">
+                                        <i class="fa-solid fa-key mr-1"></i> Reveal Model Answer
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr id="sol-psy" class="hidden bg-purple-50 text-purple-900 border-t border-purple-200">
+                                <td colspan="4" class="p-3">
+                                    <strong>Model Solution (Psychodynamic):</strong> Alex's panic is rooted in unconscious fear of rejection and repressed shame connected to childhood criticism. The test symbolizes a threat to self-worth and parental approval.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Montano Habit Reflection Banner -->
+                <div class="bg-montano-yellow/15 border border-montano-yellow/60 p-4 rounded-lg flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-full bg-montano-yellow text-gray-900 flex items-center justify-center font-bold shrink-0">
+                        <i class="fa-solid fa-handshake"></i>
+                    </div>
+                    <div class="text-xs">
+                        <span class="font-bold text-montano-blue block text-sm">Montano Habit Integration: Habit 5 — Seek First to Understand</span>
+                        <p class="text-gray-700">Just as psychologists must understand multiple perspectives before forming a diagnosis, practice listening deeply to your teammates' points of view during group discussions without interrupting!</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: PLENARY & CHECK FOR UNDERSTANDING (10 MINS) -->
+        <section id="tab-content-4" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-montano-greenish">
+                <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+                    <h2 class="text-xl font-bold text-montano-blue flex items-center gap-2">
+                        <i class="fa-solid fa-comments text-montano-greenish"></i> Moment IV: Plenary & Interactive Knowledge Check
+                    </h2>
+                    <span class="bg-blue-100 text-montano-blue px-3 py-1 rounded-full text-xs font-bold"><i class="fa-regular fa-clock mr-1"></i>10 Minutes</span>
+                </div>
+
+                <!-- Plenary Questions Grid -->
+                <div class="mb-6">
+                    <h3 class="font-bold text-sm text-montano-blue mb-3"><i class="fa-solid fa-bullhorn mr-1"></i> Team Sharing Prompts (5 mins)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="bg-montano-bg p-3.5 rounded-lg border border-gray-200">
+                            <span class="font-bold text-montano-blue">Prompt 1:</span> "Team Spokespersons: How did your group's perspective differ from others in explaining Alex's panic?"
+                        </div>
+                        <div class="bg-montano-bg p-3.5 rounded-lg border border-gray-200">
+                            <span class="font-bold text-montano-blue">Prompt 2:</span> "Can one single perspective explain human behavior completely, or do we need an eclectic approach?"
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Game / Quiz Simulator: Perspective Matcher -->
+                <div class="bg-gray-50 p-5 rounded-xl border border-gray-200 shadow-sm">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-base text-montano-blue flex items-center gap-2">
+                            <i class="fa-solid fa-gamepad text-montano-yellow text-xl"></i> Interactive Quiz: "Perspective Matcher"
+                        </h3>
+                        <span id="quiz-score" class="bg-montano-blue text-white font-bold px-3 py-1 rounded-full text-xs">Score: 0 / 3</span>
+                    </div>
+
+                    <!-- Question 1 -->
+                    <div id="q1-container" class="space-y-2 mb-4 bg-white p-4 rounded-lg border border-gray-200">
+                        <p class="font-semibold text-xs text-gray-800">1. "Dr. Vance treats anxiety by asking clients to reframe automatic negative thoughts into positive affirmations." Which perspective is this?</p>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                            <button onclick="checkAnswer(1, 'bio', false)" class="q1-btn p-2 border rounded hover:bg-gray-100">Biological</button>
+                            <button onclick="checkAnswer(1, 'beh', false)" class="q1-btn p-2 border rounded hover:bg-gray-100">Behavioral</button>
+                            <button onclick="checkAnswer(1, 'cog', true)" class="q1-btn p-2 border rounded hover:bg-gray-100">Cognitive</button>
+                            <button onclick="checkAnswer(1, 'psy', false)" class="q1-btn p-2 border rounded hover:bg-gray-100">Psychodynamic</button>
+                        </div>
+                        <p id="q1-feedback" class="text-xs font-bold hidden"></p>
+                    </div>
+
+                    <!-- Question 2 -->
+                    <div id="q2-container" class="space-y-2 mb-4 bg-white p-4 rounded-lg border border-gray-200">
+                        <p class="font-semibold text-xs text-gray-800">2. "Sarah's fear of dogs began after being bitten at age five." Which perspective best explains this reaction?</p>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                            <button onclick="checkAnswer(2, 'bio', false)" class="q2-btn p-2 border rounded hover:bg-gray-100">Biological</button>
+                            <button onclick="checkAnswer(2, 'beh', true)" class="q2-btn p-2 border rounded hover:bg-gray-100">Behavioral</button>
+                            <button onclick="checkAnswer(2, 'cog', false)" class="q2-btn p-2 border rounded hover:bg-gray-100">Cognitive</button>
+                            <button onclick="checkAnswer(2, 'psy', false)" class="q2-btn p-2 border rounded hover:bg-gray-100">Psychodynamic</button>
+                        </div>
+                        <p id="q2-feedback" class="text-xs font-bold hidden"></p>
+                    </div>
+
+                    <!-- Question 3 -->
+                    <div id="q3-container" class="space-y-2 bg-white p-4 rounded-lg border border-gray-200">
+                        <p class="font-semibold text-xs text-gray-800">3. "Unexplained mood swings are linked to hormonal imbalances in the thyroid gland." Which perspective is this?</p>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                            <button onclick="checkAnswer(3, 'bio', true)" class="q3-btn p-2 border rounded hover:bg-gray-100">Biological</button>
+                            <button onclick="checkAnswer(3, 'beh', false)" class="q3-btn p-2 border rounded hover:bg-gray-100">Behavioral</button>
+                            <button onclick="checkAnswer(3, 'cog', false)" class="q3-btn p-2 border rounded hover:bg-gray-100">Cognitive</button>
+                            <button onclick="checkAnswer(3, 'psy', false)" class="q3-btn p-2 border rounded hover:bg-gray-100">Psychodynamic</button>
+                        </div>
+                        <p id="q3-feedback" class="text-xs font-bold hidden"></p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 5: PLENARY EVALUATION RUBRIC -->
+        <section id="tab-content-5" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 rounded-xl shadow-md border-l-4 border-montano-yellow">
+                <div class="flex flex-wrap justify-between items-center mb-4 gap-2">
+                    <h2 class="text-xl font-bold text-montano-blue flex items-center gap-2">
+                        <i class="fa-solid fa-clipboard-check text-montano-yellow"></i> Plenary Group Evaluation Checklist & Rubric
+                    </h2>
+                    <span class="bg-yellow-100 text-yellow-800 px-3 py-1 rounded-full text-xs font-bold">Summative Assessment</span>
+                </div>
+                <p class="text-gray-700 mb-4 text-sm">
+                    Use this interactive checklist during student presentations to evaluate team performance live on the digital board.
+                </p>
+
+                <!-- Interactive Scoring Rubric -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-xs text-left border-collapse border border-gray-200">
+                        <thead>
+                            <tr class="bg-montano-greenish text-white">
+                                <th class="p-3 border border-gray-300">Evaluation Criteria</th>
+                                <th class="p-3 border border-gray-300">Excellent (3 pts)</th>
+                                <th class="p-3 border border-gray-300">Satisfactory (2 pts)</th>
+                                <th class="p-3 border border-gray-300">Needs Improvement (1 pt)</th>
+                                <th class="p-3 border border-gray-300 text-center">Score</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 bg-white">
+                            <tr>
+                                <td class="p-3 font-bold text-gray-800">1. Domain of Topic & Concept Clarity</td>
+                                <td class="p-3">Accurately explains the perspective and key concepts without errors.</td>
+                                <td class="p-3">Explains main concepts with minor inaccuracies or vagueness.</td>
+                                <td class="p-3">Confuses perspectives or lacks understanding.</td>
+                                <td class="p-3 text-center">
+                                    <select onchange="calculateRubricScore()" class="rubric-score border rounded p-1 text-xs">
+                                        <option value="3">3 pts</option>
+                                        <option value="2">2 pts</option>
+                                        <option value="1">1 pt</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-bold text-gray-800">2. Case Application & Logic</td>
+                                <td class="p-3">Provides a logical, detailed explanation of Alex's anxiety using the lens.</td>
+                                <td class="p-3">Connects perspective to the case, but explanation is superficial.</td>
+                                <td class="p-3">Fails to connect the perspective to Alex's scenario.</td>
+                                <td class="p-3 text-center">
+                                    <select onchange="calculateRubricScore()" class="rubric-score border rounded p-1 text-xs">
+                                        <option value="3">3 pts</option>
+                                        <option value="2">2 pts</option>
+                                        <option value="1">1 pt</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-bold text-gray-800">3. Collaborative Work & Equity</td>
+                                <td class="p-3">All team members participate actively with clear assigned roles.</td>
+                                <td class="p-3">Most members participate; 1 person dominates presentation.</td>
+                                <td class="p-3">Only 1 member speaks; lack of teamwork evident.</td>
+                                <td class="p-3 text-center">
+                                    <select onchange="calculateRubricScore()" class="rubric-score border rounded p-1 text-xs">
+                                        <option value="3">3 pts</option>
+                                        <option value="2">2 pts</option>
+                                        <option value="1">1 pt</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="p-3 font-bold text-gray-800">4. Response to Plenary Questions</td>
+                                <td class="p-3">Responds confidently and clearly to teacher and peer questions.</td>
+                                <td class="p-3">Answers questions with partial clarity or hesitation.</td>
+                                <td class="p-3">Unable to answer basic questions about their assigned topic.</td>
+                                <td class="p-3 text-center">
+                                    <select onchange="calculateRubricScore()" class="rubric-score border rounded p-1 text-xs">
+                                        <option value="3">3 pts</option>
+                                        <option value="2">2 pts</option>
+                                        <option value="1">1 pt</option>
+                                    </select>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Total Score Summary Box -->
+                <div class="mt-4 p-4 bg-montano-bg rounded-lg border border-gray-300 flex justify-between items-center">
+                    <div>
+                        <span class="font-bold text-gray-800 text-sm">Total Group Score:</span>
+                        <span id="total-rubric-score" class="text-lg font-bold text-montano-blue ml-2">12 / 12 pts</span>
+                    </div>
+                    <button onclick="resetRubric()" class="bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1.5 rounded text-xs font-semibold transition">
+                        <i class="fa-solid fa-rotate-left mr-1"></i> Reset Rubric
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-montano-blue text-white py-4 px-6 border-t-2 border-montano-yellow text-center text-xs mt-auto">
+        <p class="font-medium">Colegio Montano — Formative Excellence & Leadership Development</p>
+        <p class="text-montano-lightblue text-[11px] mt-1">Interactive Board Application | Guatemala CNB Compliant | Teacher: Elysa López</p>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // Fullscreen Toggle Logic
+        function toggleFullScreen() {
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+                document.getElementById('fullscreen-icon').className = 'fa-solid fa-compress';
+                document.getElementById('fullscreen-text').innerText = 'Exit Fullscreen';
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+                document.getElementById('fullscreen-icon').className = 'fa-solid fa-expand';
+                document.getElementById('fullscreen-text').innerText = 'Fullscreen';
+            }
+        }
+
+        // Framework Collapsible Toggle
+        function toggleFramework() {
+            const content = document.getElementById('framework-content');
+            const chevron = document.getElementById('framework-chevron');
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                chevron.classList.add('rotate-180');
+            } else {
+                content.classList.add('hidden');
+                chevron.classList.remove('rotate-180');
+            }
+        }
+
+        // Tab Switching Logic
+        function switchTab(tabIndex) {
+            // Hide all tab contents
+            for (let i = 1; i <= 5; i++) {
+                const content = document.getElementById(`tab-content-${i}`);
+                const btn = document.getElementById(`tab-btn-${i}`);
+                if (content) content.classList.add('hidden');
+                if (btn) btn.classList.remove('active');
+            }
+
+            // Show selected tab content and set active class
+            const activeContent = document.getElementById(`tab-content-${tabIndex}`);
+            const activeBtn = document.getElementById(`tab-btn-${tabIndex}`);
+            if (activeContent) activeContent.classList.remove('hidden');
+            if (activeBtn) activeBtn.classList.add('active');
+        }
+
+        // Poll Voting State
+        const pollVotes = { bio: 0, beh: 0, cog: 0, psy: 0 };
+        function votePoll(option) {
+            pollVotes[option]++;
+            document.getElementById(`poll-${option}-count`).innerText = `${pollVotes[option]} votes`;
+        }
+
+        // Accordion Toggle for Perspective Cards
+        function toggleAccordion(id) {
+            const el = document.getElementById(id);
+            const icon = document.getElementById(`${id}-icon`);
+            if (el.classList.contains('hidden')) {
+                el.classList.remove('hidden');
+                icon.className = 'fa-solid fa-minus';
+            } else {
+                el.classList.add('hidden');
+                icon.className = 'fa-solid fa-plus';
+            }
+        }
+
+        // Table Solution Reveal Toggle
+        function toggleTableSolution(id) {
+            const el = document.getElementById(id);
+            if (el.classList.contains('hidden')) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        }
+
+        // Interactive Quiz Logic
+        let currentScore = 0;
+        const answeredQuestions = { 1: false, 2: false, 3: false };
+
+        function checkAnswer(qNum, choice, isCorrect) {
+            if (answeredQuestions[qNum]) return; // Prevent multiple attempts per question
+
+            const feedbackEl = document.getElementById(`q${qNum}-feedback`);
+            feedbackEl.classList.remove('hidden');
+
+            if (isCorrect) {
+                feedbackEl.innerText = " Correct! Great job identifying the perspective.";
+                feedbackEl.className = "text-xs font-bold text-green-600 mt-2";
+                currentScore++;
+            } else {
+                feedbackEl.innerText = " Incorrect. Re-read the scenario and try discussing with your class!";
+                feedbackEl.className = "text-xs font-bold text-red-600 mt-2";
+            }
+
+            answeredQuestions[qNum] = true;
+            document.getElementById('quiz-score').innerText = `Score: ${currentScore} / 3`;
+        }
+
+        // Rubric Calculation
+        function calculateRubricScore() {
+            const selects = document.querySelectorAll('.rubric-score');
+            let total = 0;
+            selects.forEach(select => {
+                total += parseInt(select.value);
+            });
+            document.getElementById('total-rubric-score').innerText = `${total} / 12 pts`;
+        }
+
+        // Rubric Reset
+        function resetRubric() {
+            const selects = document.querySelectorAll('.rubric-score');
+            selects.forEach(select => {
+                select.value = '3';
+            });
+            calculateRubricScore();
+        }
+    </script>
+</body>
+</html>
